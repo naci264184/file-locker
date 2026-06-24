@@ -4,6 +4,9 @@ Release/
 x64/
 x86/
 .vs/
+
+# 忽略所有 temp 临时文件夹
+temp/
 misc/
 
 # 忽略本地用户配置文件
@@ -15,7 +18,3 @@ misc/
 *.exe
 *.pdb
 *.tlog
-
-text.txt
-test.txt
-temp.txt

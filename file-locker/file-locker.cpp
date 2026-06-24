@@ -5,10 +5,12 @@ using namespace std;
 #include<Windows.h>
 #include<conio.h>
 
-string wj_lj = "target_path.txt";				//文件路径（上锁的文件，的路径）
-string sf_ss_lj = "lock_status.txt";			//是否上锁（记录文件是否已经上锁，防止过度加密、解密，导致文件错误）
-string s_zt_lj = "lock_state.txt";				//锁_状态_路径（记录锁的当前锁定方式）
-string yg_mm = "****";							//掩盖密码
+string wj_lj = "temp//data//target_path.txt";		//文件路径（上锁的文件，的路径）
+string sf_ss_lj = "temp//data//lock_status.txt";	//是否上锁（记录文件是否已经上锁，防止过度加密、解密，导致文件错误）
+string s_zt_lj = "temp//data//lock_state.txt";		//锁_状态_路径（记录锁的当前锁定方式）
+string temp_text_lj= "temp//logs//test.txt";		//临时文本_路径
+
+string yg_mm = "****";								//掩盖密码
 
 class cxs						//程序锁
 {
@@ -426,12 +428,12 @@ public:
 		temp_lj.insert(wz, "2");
 
 		ofstream ofs;
-		ofs.open("text.txt", ios::out);
+		ofs.open(temp_text_lj, ios::out);
 		ofs << temp_lj;
 		ofs.close();
 
 		ifstream ifs;
-		ifs.open("text.txt", ios::in);
+		ifs.open(temp_text_lj, ios::in);
 		ifs.getline(lj2, sizeof(lj2));
 		ifs.close();
 
@@ -470,12 +472,12 @@ public:
 		temp_lj.insert(wz, "2");
 
 		ofstream ofs;
-		ofs.open("text.txt", ios::out);
+		ofs.open(temp_text_lj, ios::out);
 		ofs << temp_lj;
 		ofs.close();
 
 		ifstream ifs;
-		ifs.open("text.txt", ios::in);
+		ifs.open(temp_text_lj, ios::in);
 		ifs.getline(lj2, sizeof(lj2));
 		ifs.close();
 
@@ -533,12 +535,12 @@ public:
 		temp_lj.insert(wz, "2");
 
 		ofstream ofs;
-		ofs.open("text.txt", ios::out);
+		ofs.open(temp_text_lj, ios::out);
 		ofs << temp_lj;
 		ofs.close();
 
 		ifstream ifs;
-		ifs.open("text.txt", ios::in);
+		ifs.open(temp_text_lj, ios::in);
 		ifs.getline(wjlj2, sizeof(wjlj2));
 		ifs.close();
 
@@ -675,7 +677,10 @@ int main()
 	}	
 
 	//3.掩盖一次密码
-	ygmm_sc();
+	if (!wj.sf_ccszlj)							//只要不是初次设置路径
+	{
+		ygmm_sc();
+	}	
 
 	//4.文件解锁（文件解密，并记录“已解锁”到文件中）
 	wj.js();
