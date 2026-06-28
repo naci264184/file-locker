@@ -1,16 +1,22 @@
+#include<Windows.h>
 #include<iostream>
 using namespace std;
 #include<fstream>
 #include<string>
-#include<Windows.h>
 #include<conio.h>
+#include <filesystem>
 
-string wj_lj = "temp//data//target_path.txt";		//文件路径（上锁的文件，的路径）
-string sf_ss_lj = "temp//data//lock_status.txt";	//是否上锁（记录文件是否已经上锁，防止过度加密、解密，导致文件错误）
-string s_zt_lj = "temp//data//lock_state.txt";		//锁_状态_路径（记录锁的当前锁定方式）
-string temp_text_lj= "temp//logs//test.txt";		//临时文本_路径
-
+//基础路径
+string wj_lj = "temp\\data\\target_path.txt";		//文件路径（上锁的文件，的路径）
+string sf_ss_lj = "temp\\data\\lock_status.txt";	//是否上锁（记录文件是否已经上锁，防止过度加密、解密，导致文件错误）
+string s_zt_lj = "temp\\data\\lock_state.txt";		//锁_状态_路径（记录锁的当前锁定方式）
+string temp_text_lj= "temp\\logs\\test.txt";		//临时文本_路径
 string yg_mm = "****";								//掩盖密码
+
+//程序运行前，优先创建对应目录
+namespace fs = std::filesystem;			//将fs设置为命名空间filesystem
+string lssj_ml = "temp/data";			//临时数据目录
+string lssj_ml2 = "temp/logs";			//临时数据目录2
 
 class cxs						//程序锁
 {
@@ -284,11 +290,11 @@ public:
 		cclj = temp_lj;
 		sfss_lj = temp_sfss;
 
-		if (pdnr())									//如果存储路径对应的文件中有内容
+		if (pdnr(cclj))								//如果存储路径对应的文件中有内容
 		{
 			ifstream ifs;
 			ifs.open(cclj, ios::in);
-			ifs.getline(wjlj, sizeof(wjlj));		//则将该文件中的内容，赋值给文件路径
+			ifs.getline(wjlj, sizeof(wjlj));			//则将该文件中的内容，赋值给文件路径
 			ifs.close();
 
 			//由于如果文件路径，带有空格，将采用手动输入存储路径的方式保存路径，这样会跳过保护路径的创建，和保护路径的数据采集，这里添加一个措施
@@ -373,6 +379,27 @@ public:
 	}
 	void dk()										//打开该文件
 	{
+		if (!pdlj(wjlj))					//如果文件已不存在
+		{
+			cout << "文件不存在，无法打开，已取消操作" << endl;
+
+			ofstream temp_ofs;
+			temp_ofs.open(wj_lj, ios::out);		//删除文件路径
+			temp_ofs.close();
+
+			temp_ofs.open(sf_ss_lj, ios::out);	//删除上锁状态
+			temp_ofs.close();
+
+			temp_ofs.open(s_zt_lj, ios::out);	//锁_状态设回1
+			temp_ofs << 1 << endl;
+			temp_ofs.close();
+
+			system("pause");
+			exit(0);
+
+			return;
+		}
+
 		//由于部分软件的路径有空格，而只有文件输入才允许有空格，system函数不允许有空格，
 		//这里的打开文件，采用加上双引号的方式打开
 		char temp[255] = { 0 };					//使用strcat_s必须初始化字符数组
@@ -421,6 +448,40 @@ public:
 	}
 	void jia_mi(const char* lj)					//文件加密（对传入的文件进行加密）
 	{
+		if (!pdlj(wjlj))						//如果文件已不存在
+		{
+			cout << "文件不存在，已取消上锁" << endl;
+
+			ofstream temp_ofs;
+			temp_ofs.open(wj_lj, ios::out);		//删除文件路径
+			temp_ofs.close();
+
+			temp_ofs.open(sf_ss_lj, ios::out);	//删除上锁状态
+			temp_ofs.close();
+
+			temp_ofs.open(s_zt_lj, ios::out);	//锁_状态设回1
+			temp_ofs << 1 << endl;
+			temp_ofs.close();
+
+			system("pause");
+			exit(0);
+
+			return;
+		}
+		else if (!pdnr(wjlj))
+		{
+			cout << "文件无内容，已取消上锁" << endl;
+
+			ofstream temp_ofs;
+			temp_ofs.open(sf_ss_lj, ios::out);	//删除上锁状态
+			temp_ofs.close();
+
+			temp_ofs.open(s_zt_lj, ios::out);	//锁_状态设回1
+			temp_ofs << 1 << endl;
+			temp_ofs.close();
+			return;
+		}
+
 		//获取一个路径为，文件路径2的路径
 		string temp_lj = lj;
 		char lj2[255];
@@ -465,6 +526,40 @@ public:
 	}
 	void jie_mi(const char* lj)						//文件解密
 	{
+		if (!pdlj(wjlj))					//如果文件已不存在
+		{
+			cout << "文件不存在，已取消解锁" << endl;
+
+			ofstream temp_ofs;
+			temp_ofs.open(wj_lj, ios::out);		//删除文件路径
+			temp_ofs.close();
+
+			temp_ofs.open(sf_ss_lj, ios::out);	//删除上锁状态
+			temp_ofs.close();
+
+			temp_ofs.open(s_zt_lj, ios::out);	//锁_状态设回1
+			temp_ofs << 1 << endl;
+			temp_ofs.close();
+
+			system("pause");
+			exit(0);
+
+			return;
+		}
+		else if (!pdnr(wjlj))
+		{
+			cout << "文件无内容，已取消解锁" << endl;
+
+			ofstream temp_ofs;
+			temp_ofs.open(sf_ss_lj, ios::out);	//删除上锁状态
+			temp_ofs.close();
+
+			temp_ofs.open(s_zt_lj, ios::out);	//锁_状态设回1
+			temp_ofs << 1 << endl;
+			temp_ofs.close();
+			return;
+		}
+
 		//获取一个路径为，文件路径2的路径
 		string temp_lj = lj;
 		char lj2[255];
@@ -508,14 +603,10 @@ public:
 		cout << "已解锁" << endl;
 	}
 	void js()
-	{
-		if (x_bhcs())							//检测一次文件是否未进行加密，是的话触发保护措施：该次不需要解密
+	{		
+		if (x_bhcs())						//检测一次文件是否上锁，是的话再解锁
 		{
-
-		}
-		else
-		{
-			jie_mi(wjlj);						//然后对文件路径进行一次解密
+			jie_mi(wjlj);					//然后对文件路径进行一次解密
 		}
 	}
 #if 0
@@ -598,6 +689,11 @@ public:
 		ifstream ifs;
 
 		ifs.open(sfss_lj, ios::in);
+		if (!ifs.is_open())			//不存在该文件
+		{
+			ifs.close();
+			return false;			//默认当未上锁
+		}
 
 		char ch = '0';
 
@@ -605,9 +701,9 @@ public:
 
 		if (ch == '1')
 		{
-			return false;
+			return true;
 		}
-		return true;
+		return false;
 	}
 	bool pdlj(string lj)							//判断路径（是否可以打开）
 	{
@@ -624,12 +720,12 @@ public:
 			return false;							//返回false
 		}
 	}
-	bool pdnr()										//判定文件中是否有内容
+	bool pdnr(string temp_pdnr_lj)					//判定文件中是否有内容
 	{
 		string temp;
 
 		ifstream ifs;
-		ifs.open(cclj, ios::in | ios::binary);		//为防止程序崩，这里再判断一次文件是否打开成功
+		ifs.open(temp_pdnr_lj, ios::in | ios::binary);	//为防止程序崩，这里再判断一次文件是否打开成功
 		if (!ifs.is_open())
 		{
 			ifs.close();
@@ -666,6 +762,11 @@ void ygmm_sc()							//掩盖密码_输出
 
 int main()
 {
+	//在当前目录下，创建一个临时数据目录，如果目录存在会自动跳过
+	fs::create_directories(lssj_ml);
+	fs::create_directories(lssj_ml2);
+
+
 	//1.初始化文件类、锁类
 	wjl wj(wj_lj.c_str(), sf_ss_lj.c_str());
 	cxs s(s_zt_lj.c_str(), "1234");
